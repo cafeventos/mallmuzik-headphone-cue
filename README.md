@@ -4,6 +4,10 @@ An NVDA add-on that makes NVDA speak through channels 3 and 4 (the headphone cue
 
 Made for blind DJs who use MallMuzik together with VirtualDJ. It works with any DJ controller that has its own sound card with 4 output channels (master on 1 and 2, headphones on 3 and 4), for example the Numark Mixtrack Pro and the Pioneer DDJ-FLX4.
 
+## Download
+
+[MallMuzik-Headphone-Cue-0.2.4.nvda-addon](releases/MallMuzik-Headphone-Cue-0.2.4.nvda-addon)
+
 ## How to use
 
 1. Install the add-on and restart NVDA.
