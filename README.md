@@ -6,7 +6,11 @@ Made for blind DJs who use MallMuzik together with VirtualDJ. It works with any 
 
 ## Download
 
-[MallMuzik-Headphone-Cue-0.2.4.nvda-addon](releases/MallMuzik-Headphone-Cue-0.2.4.nvda-addon)
+[MallMuzik-Headphone-Cue-0.2.5.nvda-addon](releases/MallMuzik-Headphone-Cue-0.2.5.nvda-addon)
+
+## What's new in 0.2.5
+
+- Works side by side with other add-ons that also route NVDA speech (such as CAF-DJ's own add-on): when NVDA closes, each add-on only undoes its own changes, so speech no longer errors on exit.
 
 ## How to use
 

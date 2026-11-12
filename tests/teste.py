@@ -90,3 +90,13 @@ m._cafdjOpen = lambda: True
 p.idle(); p.feed(mono); ok(p.fed[-1][0] == mono, 'CAF-DJ aberto: este complemento se afasta')
 
 plugin.terminate(); ok(WP.feed is not m._feed, 'desligado: NVDA original')
+
+# Outro complemento (o cafdjFone do CAF-DJ) se instalou por cima e guardou a nossa funcao. Ao sair do
+# NVDA, este desliga primeiro: o NVDA tem que continuar falando pelo outro, sem erro.
+plugin2 = m.GlobalPlugin(); ours = WP.feed
+def otherFeed(self, data, size=None, onDone=None): return ours(self, data, size, onDone)
+WP.feed = otherFeed
+plugin2.terminate(); ok(WP.feed is otherFeed, 'por baixo de outro complemento: nao desfaz o dele')
+p.feed(mono); ok(p.fed[-1][0] == mono, 'desligado, chamado pelo outro: repassa a fala sem erro')
+WP.feed = ours  # o outro devolve o que guardou
+p.feed(mono); ok(p.fed[-1][0] == mono, 'e continua repassando depois que o outro tambem desliga')

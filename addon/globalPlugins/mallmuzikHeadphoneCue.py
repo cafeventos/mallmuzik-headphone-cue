@@ -45,6 +45,9 @@ RETRY_SECONDS = 3.0
 SILENCE = 32  # 16-bit level under which the start of an utterance is cut (as NVDA does)
 
 _originals = {}
+# After terminate: our functions may still be called by another add-on that wrapped them
+# (e.g. CAF-DJ's cafdjFone). Then they only pass the audio through to NVDA.
+_terminated = False
 _lock = threading.Lock()
 _cache = {"at": 0.0, "route": None}
 _failedAt = {}  # device -> when it last failed
@@ -406,6 +409,12 @@ def _streamFor(player):
 
 
 def _feed(self, data, size=None, onDone=None):
+	if _terminated:
+		stream = getattr(self, "_cueStream", None)
+		if stream:
+			self._cueStream = None
+			stream.close()
+		return _originals["feed"](self, data, size, onDone)
 	try:
 		stream = _streamFor(self)
 		if stream:
@@ -489,15 +498,22 @@ class HeadphoneCuePanel(SettingsPanel):
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def __init__(self):
 		super().__init__()
+		global _terminated
+		_terminated = False
 		for name, func in (("feed", _feed), ("idle", _idle), ("stop", _stop)):
 			_originals[name] = getattr(nvwave.WavePlayer, name)
 			setattr(nvwave.WavePlayer, name, func)
 		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(HeadphoneCuePanel)
 
 	def terminate(self):
+		global _terminated
+		_terminated = True
+		# Another add-on may have wrapped ours: only put the original back if NVDA still has ours,
+		# and keep the originals so a wrapper that still calls us keeps working.
+		ours = {"feed": _feed, "idle": _idle, "stop": _stop}
 		for name, func in _originals.items():
-			setattr(nvwave.WavePlayer, name, func)
-		_originals.clear()
+			if getattr(nvwave.WavePlayer, name, None) is ours[name]:
+				setattr(nvwave.WavePlayer, name, func)
 		try:
 			gui.settingsDialogs.NVDASettingsDialog.categoryClasses.remove(HeadphoneCuePanel)
 		except ValueError:
